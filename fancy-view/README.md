@@ -1,3 +1,10 @@
+# Fancy View tools for CakePHP
+
+This demo shows examples of how to make Index Views that have fancy search functionality.
+
+
+
+
 # CakePHP Application Skeleton
 
 [![Build Status](https://img.shields.io/travis/cakephp/app/master.svg?style=flat-square)](https://travis-ci.org/cakephp/app)
