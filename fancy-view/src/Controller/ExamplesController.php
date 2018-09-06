@@ -1,4 +1,18 @@
 <?php
+/**
+ * Fancy View Example 
+ *
+ * An example implementation of custom elements that quickly integrate with 
+ * raw Cake/Bake templates.
+ * 
+ * @author      Daniel Watson <daniel@homesidekick.com> 
+ * @copyright   Copyright (c), Daniel Watson
+ * @license     http://danielwatson.net/
+ * @link        http://danielwatson.net/
+ * @version     Developed using PHP7, Tested for PHP7 
+ * @filesource
+ */
+
 namespace App\Controller;
 
 use App\Controller\AppController;
@@ -15,14 +29,43 @@ class ExamplesController extends AppController
 
     /**
      * Index method
+     * 
+     * ADDED - Functionality to receive search strings and return a queried result.
      *
      * @return \Cake\Http\Response|void
      */
     public function index()
     {
+
+
+        $examples = null;
+
+        if(!empty($this->request->query['search'])) {
+            $s = '%' . $this->request->query['search'] . '%';
+            $this->paginate = [
+                'conditions' => [ 'OR' => [
+                    'Examples.zip LIKE' => $s,
+                    'Examples.address LIKE' => $s,
+                    'Examples.email LIKE' => $s,
+                    'Examples.first_name LIKE' => $s,
+                    'Examples.last_name LIKE' => $s,
+                ]],
+                'limit' => 100,
+                'maxLimit'  => 1000
+            ];
+        } else {
+            $this->paginate = [
+                'conditions' => [],
+                'limit' => 100,
+                'maxLimit'  => 1000
+            ];        
+        }
+
         $examples = $this->paginate($this->Examples);
 
         $this->set(compact('examples'));
+        $this->set('_serialize', ['examples']);
+
     }
 
     /**

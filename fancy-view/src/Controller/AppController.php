@@ -16,6 +16,9 @@ namespace App\Controller;
 
 use Cake\Controller\Controller;
 use Cake\Event\Event;
+// ADDED Router and Inflector for CSV Downloads.
+use Cake\Routing\Router;
+use Cake\Utility\Inflector;
 
 /**
  * Application Controller
@@ -41,9 +44,10 @@ class AppController extends Controller
     {
         parent::initialize();
 
+        // ADDED - CSV View class (see https://github.com/FriendsOfCake/cakephp-csvview )
         $this->loadComponent('RequestHandler', [
-            'enableBeforeRedirect' => false,
-        ]);
+            'viewClassMap' => ['csv' => 'CsvView.Csv'
+        ]]);
         $this->loadComponent('Flash');
 
         /*
@@ -52,4 +56,58 @@ class AppController extends Controller
          */
         //$this->loadComponent('Security');
     }
+
+    /**
+     * Before render callback.
+     *
+     * @param \Cake\Event\Event $event The beforeRender event.
+     * @return void
+     */
+    public function beforeRender(Event $event)
+    {
+
+        if (!array_key_exists('_serialize', $this->viewVars) &&
+            in_array($this->response->type(), ['application/json', 'application/xml'])
+        ) {
+            $this->set('_serialize', true);
+        }
+
+        // ADDED - Global processing for Data Downloads ( see https://github.com/FriendsOfCake/cakephp-csvview )
+        if ($this->request->params['_ext'] === 'csv') {
+            $res_set = Inflector::underscore($this->request->params['controller']);
+
+            if(empty($this->viewVars[$res_set])) {
+                $set2 = lcfirst($this->request->params['controller']);
+                if(!empty($this->viewVars[$set2])) {
+                    $this->viewVars[$res_set] = $this->viewVars[$set2];
+                }
+            }
+
+            if(!empty($this->viewVars[$res_set])) {
+                $_serialize = $res_set;
+                $model = $this->request->params['controller'];
+                $cols = $this->$model->schema()->columns();
+                $_header = [];
+                $_extract = [];
+
+                foreach($cols as $col) {
+                    if(!empty($this->viewVars[$res_set]->first()[$col]) && $col != 'password') {
+                        $_header[] = Inflector::humanize($col);
+                        $_extract[] = $col;
+                    }
+                }
+
+//                $_delimiter = chr(9); //tab
+                $_delimiter = ','; //tab                
+                $_enclosure = '"';
+                $_newline = '\r\n';
+
+                $this->set(compact('_serialize', '_header', '_extract', '_delimiter', '_enclosure', '_newline'));
+            }
+        }
+
+    }
+
+
+
 }

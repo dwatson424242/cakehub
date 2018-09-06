@@ -4,6 +4,8 @@
  * @var \App\Model\Entity\Example[]|\Cake\Collection\CollectionInterface $examples
  */
 ?>
+
+
 <nav class="large-3 medium-4 columns" id="actions-sidebar">
     <ul class="side-nav">
         <li class="heading"><?= __('Actions') ?></li>
@@ -12,6 +14,11 @@
 </nav>
 <div class="examples index large-9 medium-8 columns content">
     <h3><?= __('Examples') ?></h3>
+<?php 
+    // ADDED - Search Element to the default baked view.
+?>
+<?= $this->Element('/search_element'); ?>
+
     <table cellpadding="0" cellspacing="0">
         <thead>
             <tr>
